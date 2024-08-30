@@ -412,6 +412,66 @@ async def fall_handler(event):
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .fall: {str(e)}")
 
+@client.on(events.NewMessage(pattern=".wave+"))
+async def wave_handler(event):
+    if event.message.from_id.user_id != MY_ID:
+        return
+
+    try:
+        text = event.message.message.split(".wave ", maxsplit=1)[1]
+        message = event.message
+        chat = event.chat_id
+
+        while True:
+            for i in range(len(text)):
+                wave_text = ''.join(
+                    [char.upper() if (j + i) % 2 == 0 else char.lower() for j, char in enumerate(text)]
+                )
+                await client.edit_message(chat, message, wave_text)
+                await asyncio.sleep(0.2)
+    except Exception as e:
+        print(f"[Error] Не удалось выполнить команду .wave: {str(e)}")
+
+@client.on(events.NewMessage(pattern=".fall+"))
+async def fall_handler(event):
+    if event.message.from_id.user_id != MY_ID:
+        return
+
+    try:
+        text = event.message.message.split(".fall ", maxsplit=1)[1]
+        chat = event.chat_id
+        
+        await event.delete()  # Удаляем исходное сообщение с командой
+        
+        sent_message = await client.send_message(chat, "‎")  # Невидимый символ для начала анимации
+
+        for i in range(1, len(text) + 1):
+            fall_text = '\n'.join([text[:j + 1] for j in range(i)])
+            
+            if fall_text.strip() and fall_text != sent_message.text:
+                await client.edit_message(chat, sent_message.id, fall_text)
+            await asyncio.sleep(0.5)
+    except Exception as e:
+        print(f"[Error] Не удалось выполнить команду .fall: {str(e)}")
+
+@client.on(events.NewMessage(pattern=".fireflies+"))
+async def fireflies_handler(event):
+    if event.message.from_id.user_id != MY_ID:
+        return
+
+    try:
+        text = event.message.message.split(".fireflies ", maxsplit=1)[1]
+        message = event.message
+        chat = event.chat_id
+
+        while True:
+            fireflies_text = ''.join(
+                [char.upper() if random.random() > 0.5 else char.lower() for char in text]
+            )
+            await client.edit_message(chat, message, fireflies_text)
+            await asyncio.sleep(0.3)
+    except Exception as e:
+        print(f"[Error] Не удалось выполнить команду .fireflies: {str(e)}")
+        
 # Запуск клиента
 client.run_until_disconnected()
-
