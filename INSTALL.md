@@ -18,11 +18,3 @@ pkg install git build-essential clang libffi openssl
 
 # Установка Telethon и других зависимостей
 pypy3 -m pip install telethon
-
-# замените
- в файле main.py строки api_id и api_hash свои данные!
-
-# как узнать данные api_id и api_hash?
-
-для этого перейдите на сайт my.telegram.org создайте свое приложение (введите любое название приложения) после появится ваши данные!
-если не поняли найдите туториал в YouTube.
