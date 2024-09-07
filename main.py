@@ -11,6 +11,7 @@ from telethon import events
 import random
 from telethon.tl.types import PeerUser
 
+# файл конфигурации 
 config_file = "config.txt"
 
 # Функция для сохранения данных в файл конфигурации
@@ -27,7 +28,7 @@ def load_config():
                 return data[0], data[1], data[2]
     return None, None, None
 
-загрузить данные из файла конфигурации
+# загрузить данные из файла конфигурации
 phone_number, api_id, api_hash = load_config()
 
 # Ввод api_id и api_hash
