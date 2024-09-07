@@ -8,6 +8,7 @@ import sys
 import asyncio
 from telethon.sync import TelegramClient
 from telethon import events
+import random
 
 # Ввод api_id и api_hash
 api_id = input("Введите ваш api_id: ")
