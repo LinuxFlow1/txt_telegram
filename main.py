@@ -52,6 +52,18 @@ try:
 except ValueError as e:
     print(f"Ошибка при получении сущности: {e}")
     
+# Функция для получения сущности пользователя
+def get_user_entity(identifier):
+    try:
+        # Получаем сущность пользователя (по ID или username)
+        user = client.get_entity(identifier)
+        return user
+    except RPCError as e:
+        print(f"Ошибка RPC при получении сущности пользователя: {e}")
+    except Exception as e:
+        print(f"Произошла ошибка при получении сущности пользователя: {e}")
+    return None
+    
 # Получение информации об аккаунте
 entity = client.get_entity("me")
 MY_ID = entity.id
