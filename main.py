@@ -11,6 +11,25 @@ from telethon import events
 import random
 from telethon.tl.types import PeerUser
 
+config_file = "config.txt"
+
+# Функция для сохранения данных в файл конфигурации
+def save_config(phone_number, api_id, api_hash):
+    with open(config_file, "w") as file:
+        file.write(f"{phone_number}\n{api_id}\n{api_hash}\n")
+
+# Функция для загрузки данных из файла конфигурации
+def load_config():
+    if os.path.exists(config_file):
+        with open(config_file, "r") as file:
+            data = file.read().splitlines()
+            if len(data) == 3:
+                return data[0], data[1], data[2]
+    return None, None, None
+
+загрузить данные из файла конфигурации
+phone_number, api_id, api_hash = load_config()
+
 # Ввод api_id и api_hash
 api_id = input("Введите ваш api_id: ")
 api_hash = input("Введите ваш api_hash: ")
