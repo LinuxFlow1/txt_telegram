@@ -13,11 +13,23 @@ import random
 # Ввод api_id и api_hash
 api_id = input("Введите ваш api_id: ")
 api_hash = input("Введите ваш api_hash: ")
+phone_number = input("Введите ваш номер телефона (в международном формате, например, +79991234567): ")
 
 # Подключение к Telegram
 client = TelegramClient('session_name', api_id, api_hash)
-client.start()
+client.connect()
 
+if not client.is_user_authorized():
+    client.send_code_request(phone_number)
+    code = input('Введите код, полученный в Telegram: ')
+    client.sign_in(phone_number, code)
+
+try:
+    entity = client.get_entity(PeerUser(1896098407))
+    print(f"пользователь найден: {entity}")
+except ValueError as e:
+    print(f"Ошибка при получении сущности: {e}")
+    
 # Получение информации об аккаунте
 entity = client.get_entity("me")
 MY_ID = entity.id
