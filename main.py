@@ -4,6 +4,7 @@
 #--# Telegram: @zopav               #--#
 ####--------------------------------####
 
+import os
 import sys
 import asyncio
 from telethon.sync import TelegramClient
