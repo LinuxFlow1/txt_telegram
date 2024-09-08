@@ -12,7 +12,7 @@ from telethon import events
 import random
 from telethon.tl.types import PeerUser
 
-# файл конфигурации 
+# файл конфигурации
 config_file = "config.txt"
 
 # Функция для сохранения данных в файл конфигурации
@@ -32,10 +32,17 @@ def load_config():
 # загрузить данные из файла конфигурации
 phone_number, api_id, api_hash = load_config()
 
-# Ввод api_id и api_hash
-api_id = input("Введите ваш api_id: ")
-api_hash = input("Введите ваш api_hash: ")
-phone_number = input("Введите ваш номер телефона (в международном формате, например, +79991234567): ")
+# Если данные отсутствуют, запросить их у пользователя
+if not all([phone_number, api_id, api_hash]):
+    print("Введите ваш номер телефона (в международном формате, например, +79991234567): ")
+    phone_number = input().strip()
+    print("Введите ваш api_id: ")
+    api_id = input().strip()
+    print("Введите ваш api_hash: ")
+    api_hash = input().strip()
+
+    # Сохранить данные в файл конфигурации
+    save_config(phone_number, api_id, api_hash)
 
 # Подключение к Telegram
 client = TelegramClient('session_name', api_id, api_hash)
@@ -316,7 +323,7 @@ async def gradient_handler(event):
         frame_index = 0
         while frame_index != len(gradient_anim):
             await client.edit_message(chat, message, gradient_anim[frame_index])
-            await asyncio.sleep(0.20)  # увеличено до 10 секунд
+            await asyncio.sleep(0.10)
             frame_index += 1
         await client.edit_message(chat, message, text)
     except Exception as e:
@@ -522,3 +529,4 @@ async def fireflies_handler(event):
         
 # Запуск клиента
 client.run_until_disconnected()
+    
