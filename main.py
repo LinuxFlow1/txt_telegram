@@ -46,26 +46,26 @@ if not client.is_user_authorized():
     client.sign_in(phone_number, code)
 
 
-# Обработчик команды `.t` для имитации набора текста
+# Обработчик команды `.t` для имитации набора текста с символом "_"
 @client.on(events.NewMessage(pattern=".t+"))
 async def handler(event):
     try:
+        # Получаем текст после команды .t
         text = event.message.message.split(".t ", maxsplit=1)[1]
-        orig_text = text
         chat = event.chat_id
 
-        tbp = ""  # to be printed
-        typing_symbol = "/"
+        tbp = ""  # Текст, который будет печататься по буквам
 
-        # Бот отправляет первое сообщение, которое будет редактироваться
-        message = await client.send_message(chat, typing_symbol)
+        # Отправляем первое сообщение, которое будет редактироваться
+        message = await client.send_message(chat, "_")
 
-        while tbp != orig_text:
-            typing_symbol = "_" if typing_symbol == "/" else "-"
-            tbp = tbp + text[0]
-            text = text[1:]
-            await client.edit_message(chat, message.id, tbp + typing_symbol)
-            await asyncio.sleep(0.1)
+        # Постепенно добавляем символы из текста, оставляя "_" после каждой буквы
+        for char in text:
+            tbp += char
+            await client.edit_message(chat, message.id, tbp + "_")
+            await asyncio.sleep(0.3)  # Задержка между буквами
+        # Убираем "_" после завершения анимации
+        await client.edit_message(chat, message.id, tbp)
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .t: {str(e)}")
 
@@ -101,7 +101,7 @@ async def heart_handler(event):
         # Бот отправляет сообщение для анимации
         message = await client.send_message(chat, edit_heart)
 
-        while frame_index != len(heart_emoji):
+        while frame_index < len(heart_emoji):
             animated_text = edit_heart.replace("1", heart_emoji[frame_index].split("-")[0]).replace("2", heart_emoji[frame_index].split("-")[1])
             await client.edit_message(chat, message.id, animated_text)
             await asyncio.sleep(1)
@@ -196,10 +196,7 @@ async def wave_handler(event):
             for i in range(len(text)):
                 wave_text = ""
                 for j, char in enumerate(text):
-                    if j == i:
-                        wave_text += char.upper()
-                    else:
-                        wave_text += char.lower()
+                    wave_text += char.upper() if j == i else char.lower()
                 await client.edit_message(chat, message.id, wave_text)
                 await asyncio.sleep(0.1)  # Скорость волны
     except Exception as e:
