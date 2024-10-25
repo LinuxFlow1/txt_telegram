@@ -3,8 +3,6 @@ import sys
 import asyncio
 from telethon.sync import TelegramClient
 from telethon import events
-import random
-from telethon.tl.types import PeerUser
 
 # файл конфигурации
 config_file = "config.txt"
@@ -59,14 +57,14 @@ async def handler(event):
         tbp = ""  # to be printed
         typing_symbol = "/"
 
+        # Бот отправляет первое сообщение, которое будет редактироваться
+        message = await client.send_message(chat, typing_symbol)
+
         while tbp != orig_text:
-            typing_symbol = "_"
+            typing_symbol = "_" if typing_symbol == "/" else "-"
             tbp = tbp + text[0]
             text = text[1:]
-            await client.send_message(chat, tbp + typing_symbol)
-            await asyncio.sleep(0.1)
-            typing_symbol = "-"
-            await client.send_message(chat, tbp)
+            await client.edit_message(chat, message.id, tbp + typing_symbol)
             await asyncio.sleep(0.1)
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .t: {str(e)}")
@@ -99,9 +97,13 @@ async def heart_handler(event):
     try:
         chat = event.chat_id
         frame_index = 0
+
+        # Бот отправляет сообщение для анимации
+        message = await client.send_message(chat, edit_heart)
+
         while frame_index != len(heart_emoji):
-            await client.send_message(chat, edit_heart.replace("1", heart_emoji[frame_index].split("-")[0])
-                                                .replace("2", heart_emoji[frame_index].split("-")[1]))
+            animated_text = edit_heart.replace("1", heart_emoji[frame_index].split("-")[0]).replace("2", heart_emoji[frame_index].split("-")[1])
+            await client.edit_message(chat, message.id, animated_text)
             await asyncio.sleep(1)
             frame_index += 1
     except Exception as e:
@@ -112,18 +114,16 @@ async def heart_handler(event):
 @client.on(events.NewMessage(pattern=".alpha+"))
 async def alpha_handler(event):
     try:
-        text = event.message.message.split(".alpha ", maxsplit=1)
-        if len(text) > 1:
-            text = text[1]
-        else:
-            text = "АЛФАВИТНЫЕ АНИМАЦИИ"
-
+        text = event.message.message.split(".alpha ", maxsplit=1)[1] if ".alpha " in event.message.message else "АЛФАВИТНЫЕ АНИМАЦИИ"
         chat = event.chat_id
-        tbp = ""  # to be напечатано
+        tbp = ""
+
+        # Бот отправляет сообщение для редактирования
+        message = await client.send_message(chat, tbp)
 
         for char in text:
             tbp += char
-            await client.send_message(chat, tbp)
+            await client.edit_message(chat, message.id, tbp)
             await asyncio.sleep(0.1)
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .alpha: {str(e)}")
@@ -173,21 +173,25 @@ async def cat_handler(event):
         chat = event.chat_id
         tbp = ""
 
+        # Бот отправляет сообщение для редактирования
+        message = await client.send_message(chat, tbp)
+
         for char in text.lower():
-            tbp += cat_emoji.get(char, char)  # заменяем буквы на эмодзи или оставляем их без изменений
-            await client.send_message(chat, tbp)
+            tbp += cat_emoji.get(char, char)
+            await client.edit_message(chat, message.id, tbp)
             await asyncio.sleep(0.1)
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .cat: {str(e)}")
 
 
-# Обработчик команды `.wave` для создания волнообразного текста
+# Обработчик команды `.wave` для волнообразного текста
 @client.on(events.NewMessage(pattern=".wave+"))
 async def wave_handler(event):
     try:
         text = event.message.message.split(".wave ", maxsplit=1)[1]
         chat = event.chat_id
-        
+        message = await client.send_message(chat, text)  # отправляем сообщение для редактирования
+
         while True:  # Бесконечный цикл для волнообразного эффекта
             for i in range(len(text)):
                 wave_text = ""
@@ -196,7 +200,7 @@ async def wave_handler(event):
                         wave_text += char.upper()
                     else:
                         wave_text += char.lower()
-                await client.send_message(chat, wave_text)
+                await client.edit_message(chat, message.id, wave_text)
                 await asyncio.sleep(0.1)  # Скорость волны
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .wave: {str(e)}")
@@ -208,10 +212,12 @@ async def merc_handler(event):
     try:
         text = event.message.message.split(".merc ", maxsplit=1)[1]
         chat = event.chat_id
+        message = await client.send_message(chat, text)
+
         while True:  # Бесконечный цикл для мерцания
-            await client.send_message(chat, text)
+            await client.edit_message(chat, message.id, text)
             await asyncio.sleep(0.5)  # Пауза для мерцания
-            await client.send_message(chat, " ")  # Пробел вместо текста
+            await client.edit_message(chat, message.id, " ")  # Пробел вместо текста
             await asyncio.sleep(0.5)  # Пауза для мерцания
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .merc: {str(e)}")
@@ -223,16 +229,13 @@ async def fall_handler(event):
     try:
         text = event.message.message.split(".fall ", maxsplit=1)[1]
         chat = event.chat_id
-        
+
         await event.delete()  # Удаляем исходное сообщение с командой
-        
-        sent_message = await client.send_message(chat, "‎")  # Невидимый символ для начала анимации
+        message = await client.send_message(chat, "‎")  # Невидимый символ для начала анимации
 
         for i in range(1, len(text) + 1):
             fall_text = '\n'.join([text[:j + 1] for j in range(i)])
-            
-            if fall_text.strip() and fall_text != sent_message.text:
-                await client.edit_message(chat, sent_message.id, fall_text)
+            await client.edit_message(chat, message.id, fall_text)
             await asyncio.sleep(0.5)
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .fall: {str(e)}")
