@@ -47,6 +47,7 @@ if not client.is_user_authorized():
     code = input('Введите код, полученный в Telegram: ')
     client.sign_in(phone_number, code)
 
+
 # Обработчик команды `.t` для имитации набора текста
 @client.on(events.NewMessage(pattern=".t+"))
 async def handler(event):
@@ -238,4 +239,4 @@ async def fall_handler(event):
 
 
 # Запуск клиента
-client.run_until
+client.run_until_disconnected()
