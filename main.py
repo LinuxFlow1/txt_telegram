@@ -47,57 +47,29 @@ if not client.is_user_authorized():
     code = input('Введите код, полученный в Telegram: ')
     client.sign_in(phone_number, code)
 
-try:
-    entity = client.get_entity(PeerUser(1896098407))
-    print(f"пользователь найден: {entity}")
-except ValueError as e:
-    print(f"Ошибка при получении сущности: {e}")
-    
-# Функция для получения сущности пользователя
-def get_user_entity(identifier):
-    try:
-        # Получаем сущность пользователя (по ID или username)
-        user = client.get_entity(identifier)
-        return user
-    except RPCError as e:
-        print(f"Ошибка RPC при получении сущности пользователя: {e}")
-    except Exception as e:
-        print(f"Произошла ошибка при получении сущности пользователя: {e}")
-    return None
-    
-# Получение информации об аккаунте
-entity = client.get_entity("me")
-MY_ID = entity.id
-print(f"[PROFILE: {entity.first_name} | Id: {MY_ID} | Uname: @{entity.username}]")
-
 # Обработчик команды `.t` для имитации набора текста
 @client.on(events.NewMessage(pattern=".t+"))
 async def handler(event):
     try:
-        if event.message.message.replace(".t ", "") == ".t":
-            return
-
-        text      = event.message.message.split(".t ", maxsplit=1)[1]
+        text = event.message.message.split(".t ", maxsplit=1)[1]
         orig_text = text
-        message   = event.message
-        chat      = event.chat_id
+        chat = event.chat_id
 
-        tbp = "" # to be printed
+        tbp = ""  # to be printed
         typing_symbol = "/"
-     
+
         while tbp != orig_text:
             typing_symbol = "_"
-            await client.edit_message(chat, message, tbp + typing_symbol)
-            await asyncio.sleep(0.1)
-
             tbp = tbp + text[0]
             text = text[1:]
-
+            await client.send_message(chat, tbp + typing_symbol)
+            await asyncio.sleep(0.1)
             typing_symbol = "-"
-            await client.edit_message(chat, message, tbp)
+            await client.send_message(chat, tbp)
             await asyncio.sleep(0.1)
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .t: {str(e)}")
+
 
 # Обработчик команды `.heart` для анимации сердечек
 heart_emoji = [
@@ -124,21 +96,18 @@ edit_heart = """
 @client.on(events.NewMessage(pattern=".heart+"))
 async def heart_handler(event):
     try:
-        text = event.message.message.replace(".heart ", "")
-        if text == ".heart":
-            message = event.message
-            chat = event.chat_id
-            frame_index = 0
-            while frame_index != len(heart_emoji):
-                await client.edit_message(chat, message, edit_heart.replace("1", heart_emoji[frame_index].split("-")[0])
-                                                                .replace("2", heart_emoji[frame_index].split("-")[1]))
-                await asyncio.sleep(1)
-                frame_index += 1
-            await client.edit_message(chat, message, text)
+        chat = event.chat_id
+        frame_index = 0
+        while frame_index != len(heart_emoji):
+            await client.send_message(chat, edit_heart.replace("1", heart_emoji[frame_index].split("-")[0])
+                                                .replace("2", heart_emoji[frame_index].split("-")[1]))
+            await asyncio.sleep(1)
+            frame_index += 1
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .heart: {str(e)}")
 
-# Обработчик команды `.alpha` для анимации текста посимвольно (поддержка русского алфавита)
+
+# Обработчик команды `.alpha` для анимации текста посимвольно
 @client.on(events.NewMessage(pattern=".alpha+"))
 async def alpha_handler(event):
     try:
@@ -148,16 +117,16 @@ async def alpha_handler(event):
         else:
             text = "АЛФАВИТНЫЕ АНИМАЦИИ"
 
-        message = event.message
         chat = event.chat_id
         tbp = ""  # to be напечатано
 
         for char in text:
             tbp += char
-            await client.edit_message(chat, message, tbp)
+            await client.send_message(chat, tbp)
             await asyncio.sleep(0.1)
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .alpha: {str(e)}")
+
 
 # Обработчик команды `.cat` для анимации текста в виде эмодзи котов
 cat_emoji = {
@@ -200,23 +169,22 @@ cat_emoji = {
 async def cat_handler(event):
     try:
         text = event.message.message.split(".cat ", maxsplit=1)[1]
-        message = event.message
         chat = event.chat_id
         tbp = ""
 
         for char in text.lower():
             tbp += cat_emoji.get(char, char)  # заменяем буквы на эмодзи или оставляем их без изменений
-            await client.edit_message(chat, message, tbp)
+            await client.send_message(chat, tbp)
             await asyncio.sleep(0.1)
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .cat: {str(e)}")
+
 
 # Обработчик команды `.wave` для создания волнообразного текста
 @client.on(events.NewMessage(pattern=".wave+"))
 async def wave_handler(event):
     try:
         text = event.message.message.split(".wave ", maxsplit=1)[1]
-        message = event.message
         chat = event.chat_id
         
         while True:  # Бесконечный цикл для волнообразного эффекта
@@ -227,7 +195,7 @@ async def wave_handler(event):
                         wave_text += char.upper()
                     else:
                         wave_text += char.lower()
-                await client.edit_message(chat, message, wave_text)
+                await client.send_message(chat, wave_text)
                 await asyncio.sleep(0.1)  # Скорость волны
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .wave: {str(e)}")
@@ -238,66 +206,14 @@ async def wave_handler(event):
 async def merc_handler(event):
     try:
         text = event.message.message.split(".merc ", maxsplit=1)[1]
-        message = event.message
         chat = event.chat_id
         while True:  # Бесконечный цикл для мерцания
-            await client.edit_message(chat, message, text)
+            await client.send_message(chat, text)
             await asyncio.sleep(0.5)  # Пауза для мерцания
-            await client.edit_message(chat, message, " ")  # Пробел вместо текста
+            await client.send_message(chat, " ")  # Пробел вместо текста
             await asyncio.sleep(0.5)  # Пауза для мерцания
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .merc: {str(e)}")
-
-
-# Обработчик команды `.gradient` для градиентной анимации
-gradient_anim = [
-    "░▒▓█▓▒░",
-    "▒▓█▓▒░▒",
-    "▓█▓▒░▒▓",
-    "█▓▒░▒▓█",
-]
-
-@client.on(events.NewMessage(pattern=".gradient+"))
-async def gradient_handler(event):
-    try:
-        text = event.message.message.replace(".gradient ", "")
-        if text == ".gradient":
-            text = "GRADIENT EFFECT"
-
-        message = event.message
-        chat = event.chat_id
-        frame_index = 0
-        while frame_index != len(gradient_anim):
-            await client.edit_message(chat, message, gradient_anim[frame_index])
-            await asyncio.sleep(0.10)
-            frame_index += 1
-        await client.edit_message(chat, message, text)
-    except Exception as e:
-        print(f"[Error] Не удалось выполнить команду .gradient: {str(e)}")
-
-
-# Обработчик команды `.color` для анимации цвета
-color_anim = [
-    "🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "🟥"
-]
-
-@client.on(events.NewMessage(pattern=".color+"))
-async def color_handler(event):
-    try:
-        text = event.message.message.replace(".color ", "")
-        if text == ".color":
-            text = "RAINBOW EFFECT"
-
-        message = event.message
-        chat = event.chat_id
-        tbp = ""  # to be printed
-        for color in color_anim:
-            tbp += color
-            await client.edit_message(chat, message, tbp)
-            await asyncio.sleep(0.5)  # уменьшил интервал для плавности анимации
-        await client.edit_message(chat, message, text)
-    except Exception as e:
-        print(f"[Error] Не удалось выполнить команду .color: {str(e)}")
 
 
 # Обработчик команды `.fall` для эффекта падающего текста
@@ -320,5 +236,6 @@ async def fall_handler(event):
     except Exception as e:
         print(f"[Error] Не удалось выполнить команду .fall: {str(e)}")
 
+
 # Запуск клиента
-client.run_until_disconnected()
+client.run_until
