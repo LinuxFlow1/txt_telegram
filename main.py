@@ -10,7 +10,7 @@ import math
 import subprocess
 import json
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-from telethon import TelegramClient, events, Button
+from telethon import TelegramClient
 from telethon.errors import FloodWaitError, ChatAdminRequiredError
 from collections import deque
 from pyfiglet import Figlet
@@ -800,7 +800,7 @@ def get_movie_trailer(movie_id):
                 return f"https://youtu.be/{video.get('key')}"
     return None
 
-# Функция получения подробной информации и постера из lampa.web API  
+# Функция получения подробной информации и постера из lampa.web API
 def get_movie_details_lampa(movie_id):
     """
     Предполагаем, что API lampa.web находится по адресу:
@@ -922,12 +922,11 @@ async def film_input_handler(event):
             await film_player.update_message()
             await event.delete()
 
-
 @client.on(events.NewMessage(pattern=r"\.help"))
 async def help_handler(event):
     """Показывает список доступных команд."""
-    help_text = """
-🚀 Доступные команды:
+    help_text = """🚀 **Доступные команды:**
+
 `.ascii <текст>` - Преобразует текст в ASCII-арт
 `.t <текст>` - Эффект печатающей машинки
 `.cosmic <текст>` - Галактическая анимация
@@ -943,8 +942,10 @@ async def help_handler(event):
 `.read` (ответ на сообщение) - Озвучить текст сообщения (Android + Termux)
 `.foto_ascii` - Конвертация фото в ASCII-арт (ответьте на фото)
 `.disable` - Отключить/включить анимации от других пользователей
+`.film <название>` - Найти фильм по названию
 `.help` - Показать это сообщение
-✨ Примеры использования:
+
+✨ **Примеры использования:**
 `.ascii Hello`
 `.t Привет!`
 `.cosmic Telegram`
@@ -960,8 +961,9 @@ async def help_handler(event):
 `.read` (ответ на сообщение)
 `.foto_ascii` (ответьте на фото)
 `.disable`
-    """
-    await event.respond(help_text)
+`.film Интерстеллар`
+"""
+    await event.reply(help_text)
 
 @client.on(events.NewMessage(pattern=r"\.disable"))
 async def disable_handler(event):
@@ -974,7 +976,7 @@ async def disable_handler(event):
     phone, api_id, api_hash, _ = ConfigManager.load()
     ConfigManager.save(phone, api_id, api_hash, DISABLE_ANIMATIONS)
     state = "отключены" if DISABLE_ANIMATIONS else "включены"
-    await event.respond(f"Анимации от других пользователей {state}.")
+    await event.reply(f"Анимации от других пользователей {state}.")
 
 async def main():
     """Основная функция запуска бота."""
